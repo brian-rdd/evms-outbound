@@ -2,11 +2,39 @@
   "name": "evms-outbound",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node_modules/typescript/bin/tsc",
+    "watch": "node_modules/typescript/bin/tsc -w --preserveWatchOutput"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brian-rdd/evms-outbound.git"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/brian-rdd/evms-betting/issues"
+  },
+  "homepage": "https://github.com/brian-rdd/evms-betting#readme",
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.96",
+    "@types/lodash": "^4.14.182",
+    "@types/node": "^17.0.31",
+    "puppeteer": "^13.7.0",
+    "typescript": "^4.6.4"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.85.0",
+    "@aws-sdk/lib-dynamodb": "^3.85.0",
+    "@aws-sdk/util-dynamodb": "^3.85.0",
+    "chrome-aws-lambda": "^10.1.0",
+    "dayjs": "^1.11.2",
+    "puppeteer-core": "^10.4.0",
+    "puppeteer-extra": "^3.2.3",
+    "puppeteer-extra-plugin-stealth": "^2.9.0",
+    "source-map-support": "^0.5.21",
+    "winston": "^3.7.2"
+  }
 }

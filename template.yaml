@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  evms-outbound
+
+  This stack handles when bets are to be actually executed.
+
+Parameters:
+  BettingStackName:
+    Type: String
+    Default: evms-betting
+
+Globals:
+  Function:
+    Timeout: 3
+    Runtime: nodejs14.x
+    Layers:
+      - !Ref OutboundDependencyLayer
+    Architectures:
+        - x86_64
+    Environment:
+      Variables:
+        DDB_TABLE_TODAYS_BETS: !ImportValue
+          Fn::Sub: ${BettingStackName}-TodaysBetsTableName
+        DDB_TABLE_ALL_BETS: !ImportValue
+          Fn::Sub: ${BettingStackName}-BetsTableName
+
+Resources:
+
+  OutboundDependencyLayer:
+    Type: AWS::Serverless::LayerVersion
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      ContentUri: ./
+      CompatibleRuntimes:
+        - nodejs14.x
+  
+  OnNewBet:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: makefile
+    Properties:
+      Handler: dist/handlers/onNewBet.handler
+      Policies:
+        - DynamoDBStreamReadPolicy:
+            TableName: !ImportValue
+              Fn::Sub: ${BettingStackName}-TodaysBetsTableName
+            StreamName: !ImportValue
+              Fn::Sub: ${BettingStackName}-TodaysBetsTableStreamArn
+        - DynamoDBCrudPolicy:
+            TableName: !ImportValue
+              Fn::Sub: ${BettingStackName}-TodaysBetsTableName
+        - DynamoDBCrudPolicy:
+            TableName: !ImportValue
+              Fn::Sub: ${BettingStackName}-BetsTableName
+      Events:
+        NewBet:
+          Type: DynamoDB
+          Properties:
+            BatchSize: 1
+            Enabled: true
+            StartingPosition: LATEST
+            Stream: !ImportValue
+              Fn::Sub: ${BettingStackName}-TodaysBetsTableStreamArn
+            FilterCriteria:
+              Filters: 
+                - Pattern: '{ "dynamodb": { "NewImage": { "status": { "S": ["PENDING"] }}}}'
+                - Pattern: '{ "eventName" : ["INSERT"]}'
